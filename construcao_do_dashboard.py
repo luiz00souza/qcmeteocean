@@ -2,7 +2,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-
+import plotly.graph_objects as go
 # Dados
 np.random.seed(42)  # Para resultados reprodutíveis
 tempo = pd.date_range(start='2025-01-01', end='2025-12-31', freq='ME')
