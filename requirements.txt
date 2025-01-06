@@ -1,4 +1,4 @@
 streamlit
 plotly
 matplotlib.pyplot
-streamlit-option-menu
+streamlit-option-menu==0.3.2
