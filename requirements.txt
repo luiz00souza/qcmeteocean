@@ -1,4 +1,3 @@
 streamlit
 plotly
 matplotlib.pyplot
-streamlit_option_menu
