@@ -280,8 +280,8 @@ def exibir_mare():
     st.subheader("Informações sobre Maré")
     opcao = st.radio("Escolha a opção de visualização", ["Gráfico", "Tabela"])
     if opcao == "Gráfico":
-        # exibir_grafico(df_mare)
-        exibir_grafico_mare(df_mare)
+        exibir_grafico(df_mare)
+        # exibir_grafico_mare(df_mare)
         # exibir_grafico(df_mare)
 
     elif opcao == "Tabela":
@@ -291,7 +291,7 @@ def exibir_meteorologia():
     st.subheader("Informações Meteorológicas")
     opcao = st.radio("Escolha a opção de visualização", ["Gráfico", "Tabela"])
     if opcao == "Gráfico":
-        # exibir_grafico_velocidade_vento(df_meteorologia)
+        exibir_grafico_velocidade_vento(df_meteorologia)
 
         exibir_grafico(df_meteorologia)
     elif opcao == "Tabela":
@@ -353,9 +353,12 @@ def importar_dados_mare():
         "maré_prevista": maré_prevista,
         "maré_filtro_fraco": maré_filtro_fraco,
         "maré_filtro_medio": maré_filtro_medio,
+        
+        "Flag_Tide_level": [0 if i % 5 != 0 else 4 for i in range(100)],  # Flag: 0 válido, 4 inválido
         "Flag_maré_observada": [0 if i % 5 != 0 else 4 for i in range(100)],  # Flag: 0 válido, 4 inválido
-        "Flag_Tide_level": [0 if i % 5 != 0 else 4 for i in range(100)]  # Flag: 0 válido, 4 inválido
-
+        "Flag_maré_prevista": [0 if i % 5 != 0 else 4 for i in range(100)],  # Flag: 0 válido, 4 inválido
+        "Flag_filtro_fraco": [0 if i % 5 != 0 else 4 for i in range(100)] , # Flag: 0 válido, 4 inválido
+        "Flag_filtro_medio": [0 if i % 5 != 0 else 4 for i in range(100)]  # Flag: 0 válido, 4 inválido
         })
     return pd.DataFrame(data)
 
@@ -414,7 +417,7 @@ def importar_dados_meteorologia():
         "Flag_Gust_speed":  [0 if i % 2 != 0 else 4 for i in range(100)],
         "Flag_Wind_speed": [0 if i % 3 != 0 else 4 for i in range(100)],  # Flag para Wind_speed
         "Wind Direction(*)": [i % 360 for i in range(100)],
-        "Wind Direction(*)_flag": [0 if i % 4 != 0 else 4 for i in range(100)],  # Flag para Wind_direction
+        "Flag_Wind Direction(*)": [0 if i % 4 != 0 else 4 for i in range(100)],  # Flag para Wind_direction
         "Temperature(*C)": [25 + 0.05 * i for i in range(100)],
         "Flag_Temperature(*C)": [0 if i % 5 != 0 else 4 for i in range(100)],  # Flag para Temperature
         'Pressure(hPa)': [1015 - (i % 10) for i in range(100)],
@@ -435,18 +438,18 @@ def grau_para_pontos_cardinais(graus):
     return direcoes[index]
 
 # Carregar dados de Ondas Não Direcionais
-# df_mare = importar_dados_mare()
-# df_ondas=importar_dados_ondas()
-# df_correntes=importar_dados_correntes()
-# df_meteorologia=importar_dados_meteorologia()
+df_mare = importar_dados_mare()
+df_ondas=importar_dados_ondas()
+df_correntes=importar_dados_correntes()
+df_meteorologia=importar_dados_meteorologia()
 df_ondas_nao_direcionais=importar_dados_onda_nao_direcional()
 
 
 # parametro_para_teste = 'ONDAS' # 'CORRENTES','METEOROLOGIA','MARE','ONDAS'
-df_ondas=importar_e_aplicar_QC('ONDAS')
-df_mare=importar_e_aplicar_QC('MARE')
-df_correntes=importar_e_aplicar_QC('CORRENTES')
-df_meteorologia=importar_e_aplicar_QC('METEOROLOGIA')
+# df_ondas=importar_e_aplicar_QC('ONDAS')
+# df_mare=importar_e_aplicar_QC('MARE')
+# df_correntes=importar_e_aplicar_QC('CORRENTES')
+# df_meteorologia=importar_e_aplicar_QC('METEOROLOGIA')
 
 
 # Função para exibir gráfico
