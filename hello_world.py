@@ -14,8 +14,8 @@ from streamlit_option_menu import option_menu
 
 
 # sys.path.append(r'G:\Drives compartilhados\DHE_REPASSE\2024\ID00_PD_MITR-QCMO\01_Scripts\20241206_Version_008')
-from Acesso_Dados_servidor_FTP import *
-from QC_OPERACIONAL_UMISAN import *
+#from Acesso_Dados_servidor_FTP import *
+#from QC_OPERACIONAL_UMISAN import *
 
 # Definindo um dicionário com login, senha e permissões
 usuarios = {
