@@ -260,3 +260,41 @@ if uploaded_file:
                     mime="text/plain"
                 )
 
+import streamlit as st
+from github import Github
+
+# Configurações do GitHub
+GITHUB_TOKEN = st.secrets["github_token"]  # Armazene o token no Streamlit Secrets
+REPO_NAME = "luiz00souza/qcmeteocean"  # Substitua pelo nome do seu repositório
+
+# Função para criar uma issue no GitHub
+def create_github_issue(title, body):
+    try:
+        g = Github(GITHUB_TOKEN)
+        repo = g.get_repo(REPO_NAME)
+        issue = repo.create_issue(title=title, body=body)
+        return issue
+    except Exception as e:
+        return f"Erro ao criar a issue: {e}"
+
+# Interface do Streamlit
+st.title("Caixa de Sugestões")
+st.write("Envie suas sugestões para melhorar este projeto!")
+
+# Entrada do usuário
+suggestion = st.text_area("Escreva sua sugestão aqui:")
+name = st.text_input("Seu nome (opcional):")
+
+# Botão para enviar
+if st.button("Enviar Sugestão"):
+    if suggestion.strip():
+        issue_title = f"Sugestão de {name or 'Anônimo'}"
+        issue_body = suggestion
+        result = create_github_issue(issue_title, issue_body)
+        if isinstance(result, str):
+            st.error(result)
+        else:
+            st.success(f"Sugestão enviada com sucesso! [Veja no GitHub]({result.html_url})")
+    else:
+        st.warning("Por favor, insira uma sugestão antes de enviar.")
+
