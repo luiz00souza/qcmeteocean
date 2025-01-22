@@ -294,7 +294,7 @@ if st.button("Enviar Sugestão"):
         if isinstance(result, str):
             st.error(result)
         else:
-            st.success(f"Sugestão enviada com sucesso! [Veja no GitHub]({result.html_url})")
+            st.success(f"Sugestão enviada com sucesso!")
     else:
         st.warning("Por favor, insira uma sugestão antes de enviar.")
 
