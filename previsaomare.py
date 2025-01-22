@@ -48,19 +48,24 @@ def aplicar_filtro(df, height_col, tipo_filtro, sampling_interval):
     filtered_data = filtfilt(b, a, df[height_col].values)
     return filtered_data
 
-def reindex_time_gaps(df, avg_delta_t):
-    time_col = pd.to_datetime(df['Time GMT-03:00'], errors='coerce')
-    df['Time GMT-03:00'] = time_col  # Atualiza no DataFrame
-    df = df.dropna(subset=['Time GMT-03:00'])
+def reindex_time_gaps(df,time_col, avg_delta_t):
+    coluna_tempo=time_col
+    time_col = pd.to_datetime(df[coluna_tempo], errors='coerce')
+    df[coluna_tempo] = time_col  # Atualiza no DataFrame
+    # coluna_tempo='Time, GMT-03:00'
+    
+    df = df.dropna(subset=[coluna_tempo])
     freq = f"{round(avg_delta_t)}S"  # Frequência em segundos
-    df = df.set_index('Time GMT-03:00')
+    df = df.set_index(coluna_tempo)
     full_time_range = pd.date_range(start=df.index.min(), end=df.index.max(), freq=freq)
     df = df.reindex(full_time_range)
-    df.index.name = 'Time GMT-03:00'  # Renomeia o índice para manter a consistência
+    df.index.name = coluna_tempo  # Renomeia o índice para manter a consistência
     return df
 
 def extrair_componentes(df, time_col, filtered_col):
     maior_bloco = encontrar_maior_bloco(df, filtered_col)
+    maior_bloco[time_col] = pd.to_datetime(maior_bloco[time_col], errors='coerce')
+
     time_dt = maior_bloco[time_col].dt.to_pydatetime()
     coef = solve(time_dt, maior_bloco[filtered_col].values, lat=-21, method='ols')
     return coef
@@ -118,7 +123,7 @@ def calcular_residuos(df, height_col):
 #%%FUNCOES VISUAIS STREAMLIT
 def selecionar_colunas(df):
     time_col = st.selectbox("Selecione a coluna de tempo", df.columns)
-    height_col = st.selectbox("Selecione a coluna de altura", df.columns)
+    height_col = st.selectbox("Selecione a coluna de altura do nivel do mar", df.columns)
     return time_col, height_col
 
 def grafico_original(df, time_col, height_col):
@@ -143,7 +148,7 @@ def grafico_comparativo(df, time_col, height_col, filtered_data_weak, filtered_d
     fig_comparison = px.line(
         df, 
         x=time_col, 
-        y=['Scaled Series - Avg, Metros, TESTE_CPES SENSOR 1', "Altura Prevista","Altura Preenchida"],
+        y=[height_col, "Altura Prevista","Altura Preenchida"],
         labels={time_col: "Tempo", "value": "Altura da Maré"},
         title="Maré Observada vs Prevista"
     )
@@ -187,7 +192,39 @@ def download_dados(df, forecast_df):
         file_name="previsao_mare_1_ano.csv",
         mime="text/csv"
     )
-    
+
+
+# time_col = 'Time, GMT-03:00'
+# height_col = 'Scaled Series - Avg, Metros, TOIL SENSOR 1'
+
+# # "Time, GMT-03:00","Scaled Series - Avg, Metros, TOIL SENSOR 1"
+# df=carregar_dados(r"C:\Users\campo\Downloads\PP_100_22_PDA_TOIL_NOVO_2025_01_22_14_52_41_ART_1.csv")
+
+# # df = processar_dados(df, time_col, height_col)
+# # df = carregar_e_processar_csv(df, time_col, height_col)
+
+# avg_delta_t = 300
+# filtered_data_weak = aplicar_filtro(df, height_col, 'Fraco', sampling_interval=600)
+# filtered_data_medium = aplicar_filtro(df, height_col, 'Médio', sampling_interval=600)
+# df['Filtro Fraco'] = filtered_data_weak
+# df['Filtro Médio'] = filtered_data_medium
+# maior_bloco = encontrar_maior_bloco(df, 'Filtro Fraco')
+
+
+# # Reindexar para preencher os gaps no tempo
+# df = reindex_time_gaps(df, time_col,avg_delta_t)
+# coef = extrair_componentes(maior_bloco, time_col=time_col, filtered_col='Filtro Fraco')
+# df = reconstruir_mare(df, time_col, coef)
+# df = calcular_residuos(df, height_col)
+# forecast_df = gerar_previsao(df, coef, avg_delta_t, time_col)
+# df["Altura Preenchida"] = df[height_col].combine_first(df["Altura Prevista"])
+# # Ajustar os offsets nos gaps
+# df_ajustado = ajustar_offset_gaps(df, time_col=time_col, 
+#                               height_col=height_col,
+#                               predicted_col='Altura Preenchida')
+                
+
+
 st.title("Processamento e Análise de Séries Temporais")
 
 st.write("""
@@ -212,7 +249,7 @@ if uploaded_file:
             with st.spinner("Processando os dados..."):
                     # Processamento inicial
 
-# time_col = 'Time GMT-03:00'
+# time_col = 'Time, GMT-03:00'
 # height_col = 'Scaled Series - Avg, Metros, TESTE_CPES SENSOR 1'
 # df=carregar_dados(r"C:\Users\campo\Downloads\CPES_OUT2024_2024_12_19_09_19_48_ART_1.csv")
 
@@ -228,14 +265,14 @@ if uploaded_file:
                 
                 
                 # Reindexar para preencher os gaps no tempo
-                df = reindex_time_gaps(df, avg_delta_t)
-                coef = extrair_componentes(maior_bloco, time_col='Time GMT-03:00', filtered_col='Filtro Fraco')
+                df = reindex_time_gaps(df, time_col,avg_delta_t)
+                coef = extrair_componentes(maior_bloco, time_col=time_col, filtered_col='Filtro Fraco')
                 df = reconstruir_mare(df, time_col, coef)
                 df = calcular_residuos(df, height_col)
                 forecast_df = gerar_previsao(df, coef, avg_delta_t, time_col)
                 df["Altura Preenchida"] = df[height_col].combine_first(df["Altura Prevista"])
                 # Ajustar os offsets nos gaps
-                df_ajustado = ajustar_offset_gaps(df, time_col='Time GMT-03:00', 
+                df_ajustado = ajustar_offset_gaps(df, time_col=time_col, 
                                                   height_col=height_col,
                                                   predicted_col='Altura Preenchida')
                 
@@ -294,7 +331,7 @@ if st.button("Enviar Sugestão"):
         if isinstance(result, str):
             st.error(result)
         else:
-            st.success(f"Sugestão enviada com sucesso!")
+            st.success(f"Sugestão enviada com sucesso! [Veja no GitHub]({result.html_url})")
     else:
         st.warning("Por favor, insira uma sugestão antes de enviar.")
 
