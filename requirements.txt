@@ -4,4 +4,5 @@ plotly
 matplotlib
 streamlit-option-menu
 numpy
+setuptools
 utide
