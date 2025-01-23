@@ -67,7 +67,7 @@ def extrair_componentes(df, time_col, filtered_col):
     maior_bloco[time_col] = pd.to_datetime(maior_bloco[time_col], errors='coerce')
 
     time_dt = maior_bloco[time_col].dt.to_pydatetime()
-    coef = solve(time_dt, maior_bloco[filtered_col].values, lat=-21, method='ols')
+    coef = solve(time_dt, maior_bloco[filtered_col].values, lat=-56, method='ols')
     return coef
 def encontrar_maior_bloco(df, col):
     mask_valid = df[col].notna()
