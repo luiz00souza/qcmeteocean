@@ -67,7 +67,7 @@ def extrair_componentes(df, time_col, filtered_col):
     maior_bloco[time_col] = pd.to_datetime(maior_bloco[time_col], errors='coerce')
 
     time_dt = maior_bloco[time_col].dt.to_pydatetime()
-    coef = solve(time_dt, maior_bloco[filtered_col].values, lat=-56, method='ols')
+    coef = solve(time_dt, maior_bloco[filtered_col].values, lat=latitude, method='ols')
     return coef
 def encontrar_maior_bloco(df, col):
     mask_valid = df[col].notna()
@@ -162,8 +162,8 @@ def grafico_residuos(df, time_col):
         title="Resíduos da Maré"
     )
     st.plotly_chart(fig_residuals)
-def exibir_componentes(coef):
-    st.write("Componentes Harmônicas Extraídas:")
+def exibir_componentes(coef,tipo_de_filtro):
+    st.write(f"Componentes Harmônicas Extraídas:({tipo_de_filtro})")
     st.dataframe(pd.DataFrame({
         "Constituente": coef['name'],
         "Amplitude (m)": coef['A'],
@@ -243,59 +243,76 @@ if uploaded_file:
     # Só executa as funções após selecionar as colunas
     if time_col and height_col:
         st.success(f"Colunas selecionadas: Tempo = '{time_col}', Altura = '{height_col}'")
-        
-        # Botão para confirmar e iniciar o processamento
-        if st.button("Processar Dados"):
-            with st.spinner("Processando os dados..."):
+        # Seleção do filtro
+        tipo_filtro = st.selectbox(
+            "Selecione o tipo de filtro que deseja aplicar:",
+            options=[f'{height_col}', "Filtro Fraco", "Filtro Médio"],
+            index=0  # Default: "Sem Filtro"
+        )
+
+        filtro_selecionado = st.radio(
+            "Escolha o tipo de filtro a ser aplicado:",
+            (f'{height_col}', "Filtro Fraco", "Filtro Médio"),
+        )
+        latitude = st.number_input(r"Insira a latitude do local (exemplo: -21 para o Vitória/ES)", 
+                           min_value=-90.0, max_value=90.0, value=-21.0, step=0.1)
+
+        # Habilitar botão somente após seleção do filtro
+        if filtro_selecionado:
+            if st.button("Processar Dados"):
+                with st.spinner("Processando os dados..."):
                     # Processamento inicial
 
-# time_col = 'Time, GMT-03:00'
-# height_col = 'Scaled Series - Avg, Metros, TESTE_CPES SENSOR 1'
-# df=carregar_dados(r"C:\Users\campo\Downloads\CPES_OUT2024_2024_12_19_09_19_48_ART_1.csv")
-
-# df = processar_dados(df, time_col, height_col)
-                df = carregar_e_processar_csv(df, time_col, height_col)
-
-                avg_delta_t = 300
-                filtered_data_weak = aplicar_filtro(df, height_col, 'Fraco', sampling_interval=600)
-                filtered_data_medium = aplicar_filtro(df, height_col, 'Médio', sampling_interval=600)
-                df['Filtro Fraco'] = filtered_data_weak
-                df['Filtro Médio'] = filtered_data_medium
-                maior_bloco = encontrar_maior_bloco(df, 'Filtro Fraco')
-                
-                
-                # Reindexar para preencher os gaps no tempo
-                df = reindex_time_gaps(df, time_col,avg_delta_t)
-                coef = extrair_componentes(maior_bloco, time_col=time_col, filtered_col='Filtro Fraco')
-                df = reconstruir_mare(df, time_col, coef)
-                df = calcular_residuos(df, height_col)
-                forecast_df = gerar_previsao(df, coef, avg_delta_t, time_col)
-                df["Altura Preenchida"] = df[height_col].combine_first(df["Altura Prevista"])
-                # Ajustar os offsets nos gaps
-                df_ajustado = ajustar_offset_gaps(df, time_col=time_col, 
-                                                  height_col=height_col,
-                                                  predicted_col='Altura Preenchida')
-                
-                grafico_original(df, time_col, height_col)
-                grafico_comparativo(df_ajustado, time_col, height_col, filtered_data_weak, filtered_data_medium)
-                exibir_componentes(coef)
-                st.title("Tabela de Dados")
-                st.dataframe(df_ajustado.head())  # Mostra as primeiras 5 linhas
-                
-                grafico_residuos(df_ajustado, time_col)
-                
-                grafico_previsao(forecast_df)
-                
-                download_dados(df_ajustado, forecast_df)
-                tid_content = df_ajustado.to_csv(index=False, sep="\t")  # Converte para formato tabulado
-                
-                # Botão de download para o arquivo .tid
-                st.download_button(
-                    label="Baixar Arquivo .tid",
-                    data=tid_content,
-                    file_name="dados_processados.tid",
-                    mime="text/plain"
-                )
+  
+    
+    # time_col = 'Time, GMT-03:00'
+    # height_col = 'Scaled Series - Avg, Metros, TESTE_CPES SENSOR 1'
+    # df=carregar_dados(r"C:\Users\campo\Downloads\CPES_OUT2024_2024_12_19_09_19_48_ART_1.csv")
+    
+    # df = processar_dados(df, time_col, height_col)
+                    df = carregar_e_processar_csv(df, time_col, height_col)
+                    tipo_de_filtro='Filtro Fraco'
+                    tipo_de_filtro=filtro_selecionado
+                    avg_delta_t = 300
+                    filtered_data_weak = aplicar_filtro(df, height_col, 'Fraco', sampling_interval=600)
+                    filtered_data_medium = aplicar_filtro(df, height_col, 'Médio', sampling_interval=600)
+                    df['Filtro Fraco'] = filtered_data_weak
+                    df['Filtro Médio'] = filtered_data_medium
+                    maior_bloco = encontrar_maior_bloco(df, tipo_de_filtro)
+                    
+                    
+                    # Reindexar para preencher os gaps no tempo
+                    df = reindex_time_gaps(df, time_col,avg_delta_t)
+                    coef = extrair_componentes(maior_bloco, time_col=time_col, filtered_col=tipo_de_filtro)
+                    df = reconstruir_mare(df, time_col, coef)
+                    df = calcular_residuos(df, height_col)
+                    forecast_df = gerar_previsao(df, coef, avg_delta_t, time_col)
+                    df["Altura Preenchida"] = df[height_col].combine_first(df["Altura Prevista"])
+                    # Ajustar os offsets nos gaps
+                    df_ajustado = ajustar_offset_gaps(df, time_col=time_col, 
+                                                      height_col=height_col,
+                                                      predicted_col='Altura Preenchida')
+                    
+                    grafico_original(df, time_col, height_col)
+                    grafico_comparativo(df_ajustado, time_col, height_col, filtered_data_weak, filtered_data_medium)
+                    exibir_componentes(coef, tipo_de_filtro)
+                    st.title("Tabela de Dados")
+                    st.dataframe(df_ajustado.head())  # Mostra as primeiras 5 linhas
+                    
+                    grafico_residuos(df_ajustado, time_col)
+                    
+                    grafico_previsao(forecast_df)
+                    
+                    download_dados(df_ajustado, forecast_df)
+                    tid_content = df_ajustado.to_csv(index=False, sep="\t")  # Converte para formato tabulado
+                    
+                    # Botão de download para o arquivo .tid
+                    st.download_button(
+                        label="Baixar Arquivo .tid",
+                        data=tid_content,
+                        file_name="dados_processados.tid",
+                        mime="text/plain"
+                    )
 
 import streamlit as st
 from github import Github
