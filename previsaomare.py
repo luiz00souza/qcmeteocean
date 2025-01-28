@@ -254,7 +254,7 @@ if uploaded_file:
             "Escolha o tipo de filtro a ser aplicado:",
             (f'{height_col}', "Filtro Fraco", "Filtro Médio"),
         )
-        latitude = st.number_input(r"Insira a latitude do local (exemplo: -21 para o Vitória/ES)", 
+        latitude = st.number_input(r"Insira a latitude do local (exemplo: -21 para Vitória/ES)", 
                            min_value=-90.0, max_value=90.0, value=-21.0, step=0.1)
 
         # Habilitar botão somente após seleção do filtro
