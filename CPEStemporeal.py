@@ -10,9 +10,8 @@ def carregar_dados():
     df = importar_dados_servidor_ftp()
     df = df.drop(columns=["Sea_Level_filtered"])
 
-    # df = df.iloc[255:]
     df['TIMESTAMP_ORIGINAL'] = pd.to_datetime(df['TIMESTAMP'])
-    # df= df.resample('30T').mean()
+    df= df.set_index('TIMESTAMP_ORIGINAL')
     df.columns = parameter_columns_ondas_nao_direcionais
     for coluna in df.columns:
         df[f'Flag_{coluna}'] = 0
