@@ -16,9 +16,9 @@ parametro_para_teste = 'ONDAS_NAO_DIRECIONAIS' # 'CORRENTES','METEOROLOGIA','MAR
 
 
 # input_file_meteo = r"G:\Drives compartilhados\DHE_REPASSE\2024\ID00_PD_MITR-QCMO\00_Brutos\Meteo\21663137___Over_the_last_week_2024_07_26_07_56_08_ART_1.xlsx"
-input_file_ADCP = r'G:\Drives compartilhados\DHE_REPASSE\2024\ID00_PD_MITR-QCMO\00_Brutos\DEMO_AWAC_UmiSan.txt'
+#input_file_ADCP = r'G:\Drives compartilhados\DHE_REPASSE\2024\ID00_PD_MITR-QCMO\00_Brutos\DEMO_AWAC_UmiSan.txt'
 # input_file_mare = r"G:\Drives compartilhados\DHE_REPASSE\2024\ID00_PD_MITR-QCMO\00_Brutos\Mare\PP_227_22_VALE_TUBARO_2024_04_28_16_06_59_ART_1.csv"
-input_file_ondas_nao_direcionais=r"C:\Users\campo\Desktop\wave_parameters.csv"
+#input_file_ondas_nao_direcionais=r"C:\Users\campo\Desktop\wave_parameters.csv"
 
 
 
