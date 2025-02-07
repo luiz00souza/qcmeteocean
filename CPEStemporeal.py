@@ -11,7 +11,6 @@ def carregar_dados():
     df = df.drop(columns=["Sea_Level_filtered"])
 
     df['TIMESTAMP_ORIGINAL'] = pd.to_datetime(df['TIMESTAMP'])
-    df= df.set_index('TIMESTAMP_ORIGINAL')
     df.columns = parameter_columns_ondas_nao_direcionais
     for coluna in df.columns:
         df[f'Flag_{coluna}'] = 0
