@@ -12,7 +12,6 @@ def carregar_dados():
 
     # df = df.iloc[255:]
     df['TIMESTAMP_ORIGINAL'] = pd.to_datetime(df['TIMESTAMP'])
-    df= df.set_index('TIMESTAMP_ORIGINAL')
     # df= df.resample('30T').mean()
     df.columns = parameter_columns_ondas_nao_direcionais
     for coluna in df.columns:
