@@ -914,13 +914,13 @@ def importar_e_aplicar_QC(df,parametro_para_teste):
         }
 
     #%%FILTRAR AS STRINGS DE CORRENTE SIG
-    prefix_dfs = process_txt_to_multiple_dfs(input_file_ADCP)
-    df_PNORI = prefix_dfs['$PNORI']
-    df_PNORS = prefix_dfs['$PNORS']
-    df_PNORC = prefix_dfs['$PNORC']
-    df_PNORE = prefix_dfs['$PNORE']
-    df_PNORW = prefix_dfs['$PNORW']
-    df_PNORB = prefix_dfs['$PNORB']
+    # prefix_dfs = process_txt_to_multiple_dfs(input_file_ADCP)
+    # df_PNORI = prefix_dfs['$PNORI']
+    # df_PNORS = prefix_dfs['$PNORS']
+    # df_PNORC = prefix_dfs['$PNORC']
+    # df_PNORE = prefix_dfs['$PNORE']
+    # df_PNORW = prefix_dfs['$PNORW']
+    # df_PNORB = prefix_dfs['$PNORB']
     
     
     
