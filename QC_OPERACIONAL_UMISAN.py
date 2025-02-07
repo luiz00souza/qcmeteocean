@@ -138,27 +138,56 @@ parameter_columns_ondas = [
 
 ]
 
-parameter_columns_ondas_nao_direcionais = [
-    'GMT-03:00',
-    'Tide_Level',
-    # "Distancia_radar",
-    "Sensor_Velki", 
-    'CutOff_Freq_High',
-    'Peak_Period',
-    'Mean_Period',
-    'Max_Height',
-    'Sign_Height',
-    # 'Cutoff',
-    # 'Tide_Level_filtered',
-    # 'Residual',
-    # 'HS_256Hz',
-    # 'TP_256Hz',
-    # 'Tmean_calc_256Hz',
-    # 'Hmax_calc_256Hz'
+# parameter_columns_ondas_nao_direcionais = [
+#     'GMT-03:00',
+#     'Tide_Level',
+#     # "Distancia_radar",
+#     "Sensor_Velki", 
+#     'CutOff_Freq_High',
+#     'Peak_Period',
+#     'Mean_Period',
+#     'Max_Height',
+#     'Sign_Height',
+#     # 'Cutoff',
+#     # 'Tide_Level_filtered',
+#     # 'Residual',
+#     # 'HS_256Hz',
+#     # 'TP_256Hz',
+#     # 'Tmean_calc_256Hz',
+#     # 'Hmax_calc_256Hz'
                        
     
     
-    ]
+#     ]
+parameter_columns_ondas_nao_direcionais = [
+    'GMT-03:00',
+    'Battery',
+    # "Distancia_radar",
+    "Sensor_Velki", 
+    'Pressure',
+    # 'Tide_Temperature',
+    'Tide Pressure',
+    'Tide_Level',
+    'Sign_Height',
+    'Max_Height',
+    'Mean_Period',
+    'Peak_Period',
+    'CutOff_Freq_High',
+    'Cutoff',
+    'HS_256Hz',
+    'TP_256Hz',
+    'Tmean_calc_256Hz',
+    'Hmax_calc_256Hz'
+]
+parameter_columns_ondas_nao_direcionais = [
+
+"GMT-03:00", "Tide_Level", "Battery", "Sensor_Velki",
+ "CutOff_Freq_High", "Peak_Period", "Mean_Period",
+ "Max_Height", "Sign_Height", 
+ # "Sea_Level_filtered",
+ "Residual", "Cutoff", "HS_256Hz", "TP_256Hz",
+ "Tmean_calc_256Hz", "Hmax_calc_256Hz"
+]
 
 #%% DICIONARIO DE LIMITES DE CONTROLE DE QUALIDADE
 
@@ -947,11 +976,11 @@ def importar_e_aplicar_QC(df,parametro_para_teste):
     
             #TESTE 13: Temperatura vs Ponto de orvalho	ok, substituir o ponto de orvalho caso seja maior que a temperatura, ou null,  = 0, etc.
             df, func_name = verificar_temperatura_vs_ponto_de_orvalho(df,alert_window_size)
-            # print_confiaveis(df, func_name, parameter_columns)
+            print_confiaveis(df, func_name, parameter_columns)
         
             #TESTE 14: Velocidade vs rajada
             df, func_name = verificar_velocidade_vs_rajada(df,alert_window_size)
-            # print_confiaveis(df, func_name, parameter_columns)
+            print_confiaveis(df, func_name, parameter_columns)
         # if parametro_para_teste == 'ONDAS' or parametro_para_teste == 'ONDAS_NAO_DIRECIONAIS':    
         #     #TESTE 15: Verificar altura max vs sig	
         #     df, func_name =verificar_altura_max_vs_sig(df,Hs=df['HS_256Hz'],Hmax=df['Hmax_calc_256Hz'])
@@ -1009,8 +1038,8 @@ def importar_e_aplicar_QC(df,parametro_para_teste):
         parameter_columns=parameter_columns_ondas_nao_direcionais
         # df_ondas_nao_direcionais = pd.read_csv(input_file_ondas_nao_direcionais)
         # df_ondas_nao_direcionais.rename(columns={"TIMESTAMP": "GMT-03:00"}, inplace=True)
-        # for coluna in df.columns:
-        #     df[f'Flag_{coluna}'] = 0
+        # for coluna in df_ondas_nao_direcionais.columns:
+        #     df_ondas_nao_direcionais[f'Flag_{coluna}'] = 0
         
         df=aplicar_filtros(df, parameter_columns, dict_offset, limites_range_check, dict_max_min_test, st_time_series_dict, limite_repeticao_dados, limite_sigma_aceitavel_and_dict_delta_site, sampling_frequency, coluna_tempo, alert_window_size, dict_spike, dict_lt_time_and_regressao)
         # df=df_ondas_nao_direcionais

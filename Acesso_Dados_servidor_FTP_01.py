@@ -9,12 +9,15 @@ host = "cloud10.mmitecnologia.com.br"
 port = 1322
 user = "umi"
 password = "MeteoceanUmi123"
-directory = "/Estacao03"
+directory = "/Estacao03/Processados"
 delimiter = ","
-column_names = [
-    "TIMESTAMP", "RECORD", "BattV_Min", "Sensor_radar", "Distancia_radar", "Sensor_Velki",
-    "Pressure", "Tide_Temperature", "Tide_Pressure", "Tide_Level", "Sign_Height",
-    "Max_Height", "Mean_Period", "Peak_Period", "CutOff_Freq_High"
+column_names = ["TIMESTAMP", "Tide_Level", "Battery", "Sensor_Velki",
+ "CutOff_Freq_High", "Peak_Period", "Mean_Period",
+ "Max_Height", "Sign_Height", 
+  "Sea_Level_filtered",
+ "Residual", "Cutoff", "HS_256Hz", "TP_256Hz",
+ "Tmean_calc_256Hz", "Hmax_calc_256Hz"
+   
 ]
 def fetch_dat_as_csv(host, port, user, password, directory, delimiter=",", column_names=None):
     """
@@ -39,7 +42,7 @@ def fetch_dat_as_csv(host, port, user, password, directory, delimiter=",", colum
         files = ftp.nlst()
         
         # Filtrar apenas arquivos .dat
-        dat_files = [file for file in files if file.endswith('.dat')]
+        dat_files = [file for file in files if file.endswith('.csv')]
         
         print(f"Arquivos .dat encontrados: {dat_files}")
         
@@ -163,59 +166,44 @@ def importar_dados_servidor_ftp():
     
     # Exibir o DataFrame filtrado
     # Definição dos tipos esperados
-    tipos_esperados = {
-        "TIMESTAMP": pd.Timestamp,  
-        "BattV_Min": float,         
-        "Sensor_radar": float,
-        "Distancia_radar": float,
-        "Sensor_Velki": float,
-        "Pressure": float,
-        "Tide_Temperature": float,
-        "Tide_Pressure": float,
-        "Tide_Level": float,
-        "Sign_Height": float,
-        "Max_Height": float,
-        "Mean_Period": float,
-        "Peak_Period": float,
-        "CutOff_Freq_High": float,
-    }
+
     
     # Lista das colunas de interesse
-    columns = [
-        "BattV_Min", 
-        "Sensor_radar",
-        "Distancia_radar",
-        "Sensor_Velki", 
-        "Pressure",
-        "Tide_Temperature",
-        "Tide_Pressure",
-        "Tide_Level",
-        "Sign_Height", 
-        "Max_Height",
-        "Mean_Period",
-        "Peak_Period",
-        "CutOff_Freq_High"
-    ]
+    # columns = [
+    #     "BattV_Min", 
+    #     # "Sensor_radar",
+    #     # "Distancia_radar",
+    #     "Sensor_Velki", 
+    #     # "Pressure",
+    #     # "Tide_Temperature",
+    #     # "Tide_Pressure",
+    #     "Tide_Level",
+    #     "Sign_Height", 
+    #     "Max_Height",
+    #     "Mean_Period",
+    #     "Peak_Period",
+    #     "CutOff_Freq_High"
+    # ]
 
 # Ler o arquivo como DataFrame
 
 # Filtrar linhas com o número correto de colunas
     # Verificar tipos e problemas
-    for coluna in columns:
-        df[coluna] = pd.to_numeric(df[coluna], errors='coerce')
+    # for coluna in columns:
+    #     df[coluna] = pd.to_numeric(df[coluna], errors='coerce')
     
     # Verificar tipos no DataFrame
-    problemas_de_tipos = verificar_tipos(df, tipos_esperados)
+    # problemas_de_tipos = verificar_tipos(df, tipos_esperados)
     
     # Exibir problemas encontrados
-    if problemas_de_tipos:
-        print("Problemas de tipos encontrados:")
-        for coluna, problema in problemas_de_tipos.items():
-            print(f"\nColuna: {coluna}")
-            for key, value in problema.items():
-                print(f"  {key}: {value}")
-    else:
-        print("Todos os tipos estão corretos.")
+    # if problemas_de_tipos:
+    #     print("Problemas de tipos encontrados:")
+    #     for coluna, problema in problemas_de_tipos.items():
+    #         print(f"\nColuna: {coluna}")
+    #         for key, value in problema.items():
+    #             print(f"  {key}: {value}")
+    # else:
+        # print("Todos os tipos estão corretos.")
     
     # Plotando séries temporais
     # zplotar_serie_temporal(df, columns)

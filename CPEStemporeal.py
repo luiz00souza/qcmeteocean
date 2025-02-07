@@ -1,19 +1,22 @@
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-import plotly.express as px
-from Acesso_Dados_servidor_FTP import *
+import plotly.express as px 
+from Acesso_Dados_servidor_FTP_01 import *
 from QC_OPERACIONAL_UMISAN import *
 @st.cache_data(ttl=1800)  # Cache com validade de 30 minutos (1800 segundos)
 
 def carregar_dados():
     df = importar_dados_servidor_ftp()
-    df = df.drop(columns=["RECORD", 'Sensor_radar','Distancia_radar'])
+    df = df.drop(columns=["Sea_Level_filtered"])
 
-    df = df.iloc[255:]
-    df['TIMESTAMP_ORIGINAL'] = pd.to_datetime(df['TIMESTAMP'])
+    # df = df.iloc[255:]
+    # df['TIMESTAMP_ORIGINAL'] = pd.to_datetime(df['TIMESTAMP'])
     df= df.set_index('TIMESTAMP_ORIGINAL')
-    df= df.resample('30T').mean()
+    # df= df.resample('30T').mean()
+    df.columns = parameter_columns_ondas_nao_direcionais
+    for coluna in df.columns:
+        df[f'Flag_{coluna}'] = 0
     return df
 def exibir_tabela(df):
     """Exibe a tabela com os dados e inclui opção para download."""
@@ -103,9 +106,7 @@ def main():
 
 
     df = carregar_dados()
-    df.columns = parameter_columns_ondas_nao_direcionais
-    for coluna in df.columns:
-        df[f'Flag_{coluna}'] = 0
+
     df=importar_e_aplicar_QC(df,parametro_para_teste)
     st.sidebar.subheader("Opções de Visualização")
     st.sidebar.write(f"Total de registros: {len(df)}")
@@ -113,7 +114,13 @@ def main():
     min_date, max_date = df.index.min(), df.index.max()
     date_range = st.sidebar.date_input("Selecione o intervalo", [min_date, max_date], min_value=min_date, max_value=max_date)
     if len(date_range) == 2:
+        
         start_date, end_date = date_range
+        start_date = pd.to_datetime(start_date)  # Converte para pd.Timestamp
+        end_date = pd.to_datetime(end_date)  # Converte para pd.Timestamp
+        df.index = pd.to_datetime(df.index)
+        # df = df[(df.index >= start_date) & (df.index <= end_date + pd.Timedelta(days=1) - pd.Timedelta(seconds=1))]
+# 
         df = df[(df.index >= pd.to_datetime(start_date)) & (df.index <= pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(seconds=1))]
     st.sidebar.subheader("Colunas para Visualização")
     colunas_disponiveis = [col for col in df.columns if col not in ["TIMESTAMP", "RECORD"]]  # Remove "RECORD"
@@ -121,6 +128,8 @@ def main():
         "Selecione as colunas", colunas_disponiveis, default=colunas_disponiveis
     )
     if colunas_selecionadas:
+        colunas_selecionadas = [col for col in colunas_selecionadas if col != 'GMT-03:00' and not col.startswith('Flag')]
+
         st.subheader("Dados Mais Recentes")
         ultimo_registro = df.iloc[-1]  # Obtém o último registro do DataFrame
         ultimo_timestamp = df.index[-1]  # Obtém o timestamp mais recente
