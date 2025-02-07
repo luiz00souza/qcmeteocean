@@ -148,7 +148,10 @@ def main():
                     )
     if colunas_selecionadas: 
         colunas_selecionadas = [col for col in colunas_selecionadas if col != 'GMT-03:00' and not col.startswith('Flag')]
-        st.table(df.head(10))  # Exibe apenas os primeiros 10 registros
+        df_filtrado = df[colunas_selecionadas].head(10)
+        
+        # Exibindo a tabela no Streamlit com rolagem e sem quebra de palavras
+        st.dataframe(df_filtrado.style.set_properties(**{'white-space': 'nowrap'}))         
         st.subheader("Gráfico de Séries Temporais")
         for coluna in colunas_selecionadas:
             fig = px.line(df, x=df.index, y=coluna, title=f"Série Temporal: {coluna}", labels={"x": "Data e Hora", "y": coluna})
