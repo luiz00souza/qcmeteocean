@@ -1,0 +1,65 @@
+{
+  "limites_range_check": {
+    "Tide_Level": {"ambiental": [1.6, 4], "sensores": [0, 30]},
+    "Sensor_Velki": {"ambiental": [1.5, 4], "sensores": [0, 30]},
+    "CutOff_Freq_High": {"ambiental": [0.46, 0.7], "sensores": [0, 30]},
+    "Peak_Period": {"ambiental": [1.99, 256], "sensores": [1.99, 256]},
+    "Mean_Period": {"ambiental": [1.99, 256], "sensores": [1.99, 256]},
+    "Max_Height": {"ambiental": [0, 10], "sensores": [0, 30]},
+    "Sign_Height": {"ambiental": [0, 30], "sensores": [0, 30]}
+  },
+  "dict_spike": {
+    "Tide_Level": {"window": 5, "threshold_factor": 3},
+    "Sensor_Velki": {"window": 5, "threshold_factor": 3},
+    "CutOff_Freq_High": {"window": 5, "threshold_factor": 3},
+    "Peak_Period": {"window": 5, "threshold_factor": 3},
+    "Mean_Period": {"window": 5, "threshold_factor": 3},
+    "Max_Height": {"window": 5, "threshold_factor": 3},
+    "Sign_Height": {"window": 5, "threshold_factor": 3}
+  },
+  "dict_lt_time_and_regressao": {
+    "Tide_Level": {"delta_regressao": 0.3, "delta_lt_time": 6},
+    "Sensor_Velki": {"delta_regressao": 0.3, "delta_lt_time": 6},
+    "CutOff_Freq_High": {"delta_regressao": 0.3, "delta_lt_time": 6},
+    "Peak_Period": {"delta_regressao": 0.3, "delta_lt_time": 6},
+    "Mean_Period": {"delta_regressao": 0.3, "delta_lt_time": 6},
+    "Max_Height": {"delta_regressao": 0.3, "delta_lt_time": 6},
+    "Sign_Height": {"delta_regressao": 0.3, "delta_lt_time": 6}
+  },
+  "limite_sigma_aceitavel_and_dict_delta_site": {
+    "Tide_Level": {"delta": 4, "window": 5, "delta_site": 4, "window_site": 5},
+    "Sensor_Velki": {"delta": 4, "window": 5, "delta_site": 4, "window_site": 5},
+    "CutOff_Freq_High": {"delta": 4, "window": 5, "delta_site": 4, "window_site": 5},
+    "Peak_Period": {"delta": 4, "window": 5, "delta_site": 4, "window_site": 5},
+    "Mean_Period": {"delta": 4, "window": 5, "delta_site": 4, "window_site": 5},
+    "Max_Height": {"delta": 4, "window": 5, "delta_site": 4, "window_site": 5},
+    "Sign_Height": {"delta": 4, "window": 5, "delta_site": 4, "window_site": 5}
+  },
+  "limite_repeticao_dados": {
+    "Tide_Level": {"fail": 160},
+    "Sensor_Velki": {"fail": 160},
+    "CutOff_Freq_High": {"fail": 160},
+    "Peak_Period": {"fail": 160},
+    "Mean_Period": {"fail": 160},
+    "Max_Height": {"fail": 160},
+    "Sign_Height": {"fail": 160}
+  },
+  "st_time_series_dict": {
+    "Tide_Level": {"m_points": 8, "mean_shift_threshold": 4},
+    "Sensor_Velki": {"m_points": 8, "mean_shift_threshold": 4},
+    "CutOff_Freq_High": {"m_points": 8, "mean_shift_threshold": 4},
+    "Peak_Period": {"m_points": 8, "mean_shift_threshold": 4},
+    "Mean_Period": {"m_points": 8, "mean_shift_threshold": 4},
+    "Max_Height": {"m_points": 8, "mean_shift_threshold": 4},
+    "Sign_Height": {"m_points": 8, "mean_shift_threshold": 4}
+  },
+  "dict_max_min_test": {
+    "Tide_Level": {"delta": 13, "m_points": 4, "window_size": 100},
+    "Sensor_Velki": {"delta": 13, "m_points": 4, "window_size": 100},
+    "CutOff_Freq_High": {"delta": 13, "m_points": 4, "window_size": 100},
+    "Peak_Period": {"delta": 13, "m_points": 4, "window_size": 100},
+    "Mean_Period": {"delta": 13, "m_points": 4, "window_size": 100},
+    "Max_Height": {"delta": 13, "m_points": 4, "window_size": 100},
+    "Sign_Height": {"delta": 13, "m_points": 4, "window_size": 100}
+  }
+}
