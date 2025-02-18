@@ -4,6 +4,8 @@ import plotly.express as px
 from utide import solve, reconstruct
 import numpy as np
 from scipy.signal import butter, filtfilt
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import scipy.stats as stats
 def carregar_dados(uploaded_file):
     df = pd.read_csv(uploaded_file)
     st.write("Prévia dos dados:")
@@ -20,7 +22,12 @@ def carregar_e_processar_csv(df, time_col, height_col):
     df = df.dropna(subset=[time_col, height_col])
     df = df.sort_values(by=time_col)
     return df
-
+def calcular_metricas(verdadeiro, previsto):
+    mae = mean_absolute_error(verdadeiro, previsto)
+    rmse = np.sqrt(mean_squared_error(verdadeiro, previsto))
+    r2 = r2_score(verdadeiro, previsto)
+    mape = np.mean(np.abs((verdadeiro - previsto) / verdadeiro)) * 100
+    return mae, rmse, r2, mape
 def calcular_intervalo(df, time_col):
     df['delta_t'] = df[time_col].diff().dt.total_seconds()
     avg_delta_t = df['delta_t'].mean()
@@ -296,6 +303,14 @@ if uploaded_file:
                     grafico_original(df, time_col, height_col)
                     grafico_comparativo(df_ajustado, time_col, height_col, filtered_data_weak, filtered_data_medium)
                     exibir_componentes(coef, tipo_de_filtro)
+                    ###
+                    mae_utide, rmse_utide, r2_utide, mape_utide = calcular_metricas(df[tipo_de_filtro], df["Altura Prevista"])
+                    st.write("### Avaliação dos Modelos")
+
+                    st.write(f"**UTIDE:** MAE = {mae_utide:.4f}, RMSE = {rmse_utide:.4f}, R² = {r2_utide:.4f}, MAPE = {mape_utide:.2f}%")
+
+                    
+                    ###
                     st.title("Tabela de Dados")
                     st.dataframe(df_ajustado.head())  # Mostra as primeiras 5 linhas
                     
@@ -351,4 +366,3 @@ if st.button("Enviar Sugestão"):
             st.success(f"Sugestão enviada com sucesso! [Veja no GitHub]({result.html_url})")
     else:
         st.warning("Por favor, insira uma sugestão antes de enviar.")
-
