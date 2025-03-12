@@ -304,7 +304,9 @@ if uploaded_file:
                     grafico_comparativo(df_ajustado, time_col, height_col, filtered_data_weak, filtered_data_medium)
                     exibir_componentes(coef, tipo_de_filtro)
                     ###
-                    mae_utide, rmse_utide, r2_utide, mape_utide = calcular_metricas(df[tipo_de_filtro], df["Altura Prevista"])
+                    df_clean = df[[tipo_de_filtro, "Altura Prevista"]].dropna()
+                    mae_utide, rmse_utide, r2_utide, mape_utide = calcular_metricas(df_clean[tipo_de_filtro], df_clean["Altura Prevista"])
+
                     st.write("### Avaliação dos Modelos")
 
                     st.write(f"**UTIDE:** MAE = {mae_utide:.4f}, RMSE = {rmse_utide:.4f}, R² = {r2_utide:.4f}, MAPE = {mape_utide:.2f}%")
