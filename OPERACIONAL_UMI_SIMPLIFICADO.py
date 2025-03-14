@@ -292,7 +292,7 @@ for parametro_para_teste in lista_sensores:
     # if parametro_para_teste=='CORRENTES': 
     #     gerar_grafico_gradiente_vertical(df, linha_escolhida=0, coluna_escolhida='speed(m/s)')
     #     gerar_grafico_gradiente_vertical(df, linha_escolhida=0, coluna_escolhida='amplitude')
-    resultados["parameter_column"] = parametro_para_teste  
+    # resultados["parameter_column"] = parametro_para_teste  
 
     todos_os_resultados.append(resultados)
 todos_os_resultados = pd.concat(todos_os_resultados, ignore_index=True)
