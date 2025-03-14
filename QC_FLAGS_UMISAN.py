@@ -87,13 +87,22 @@ def alerta(alert_window_size, parameter_column, func_name, df):
         if classe == 'Prioridade Urgente':
             urgente = f'Alerta URGENTE: Enviar email, conferir dados {parameter_column} ID:{i} a {i+alert_window_size}'
     pass
-def print_confiaveis(df, func_name, parameter_columns):
+def print_confiaveis(df, func_name, parameter_columns, resultados):
     for parameter_column in parameter_columns:
         fail = len(df[df[f'Flag_{parameter_column}'] != 0])
         confiaveis = len(df[df[f'Flag_{parameter_column}'] == 0])  
-        dados_confiaveis=round(100 * confiaveis / (fail + confiaveis),2)    
-        print(f"Teste {func_name}, Parametro:{parameter_column}. {fail} dados Fail, {dados_confiaveis} % de dados confiaveis")
-        df['Flag_{parameter_column}'] = 0
+        dados_confiaveis=round(100 * confiaveis / (fail + confiaveis),2)  
+        texto=f"Teste {func_name}, Parametro:{parameter_column}. {fail} dados Fail, {dados_confiaveis} % de dados confiaveis"
+        print(texto)
+        resultados.append({
+            'Teste': func_name,
+            'Parametro': parameter_column,
+            'Porcentagem Confiáveis': dados_confiaveis,
+            'Porcentagem Falhos':100- dados_confiaveis,
+            'Falhos': fail,
+            'Confiáveis': confiaveis
+        })
+    return resultados
 def mean_direction(angles):
     # Calcula a média angular de uma lista de direções (em graus)
     radians = np.radians(angles)  # Converte para radianos
@@ -227,6 +236,7 @@ def process_wave_data(df_pnorw, df_pnorb, df_pnori,df_pnors, param_columns_pnorw
                               on='GMT-03:00',
                               direction='nearest')  # Alinha para a linha mais próxima sem interpolação
 
+    df_ondas.iloc[:, 1:] = df_ondas.iloc[:, 1:].apply(pd.to_numeric, errors='coerce')
 
     df_ondas = df_ondas[param_columns_final]
     
@@ -342,9 +352,12 @@ def time_offset(df, dict_offset):
     return df, func_name
 
 #TESTE 2: Range Check Sensors.
-def range_check_sensors(df, limites,alert_window_size): 
-    for parameter_column, limites_coluna in limites.items():
-        limite_inferior_sensor, limite_superior_sensor = limites_coluna['sensores']
+def range_check_sensors(df, limites_range_check, alert_window_size):
+
+    for parameter_column, valores in limites_range_check.items():
+        limite_inferior_sensor = valores.get("sensores_min")
+        limite_superior_sensor = valores.get("sensores_max")
+        
         df[parameter_column] = pd.to_numeric(df[parameter_column], errors='coerce')
         condition_fail_sensor = (df[parameter_column] > limite_superior_sensor) | (df[parameter_column] < limite_inferior_sensor)
         df[f'Flag_{parameter_column}'] |= np.where(condition_fail_sensor, 4, 0)
@@ -352,12 +365,13 @@ def range_check_sensors(df, limites,alert_window_size):
     return df, inspect.currentframe().f_code.co_name
 
 #TESTE 3: Range Check Enviroment.
-def range_check_enviroment(df, limites,alert_window_size):
-    for parameter_column, limites_coluna in limites.items():
-        limite_inferior_amb, limite_superior_amb = limites_coluna['ambiental']
+def range_check_enviroment(df, limites_range_check,alert_window_size):
+    for parameter_column, valores in limites_range_check.items():
+        limite_inferior_ambiental = valores.get("ambiental_min")
+        limite_superior_ambiental = valores.get("ambiental_max")
         df[parameter_column] = pd.to_numeric(df[parameter_column], errors='coerce')
-        condition_fail_envir = (df[parameter_column] > limite_superior_amb) | (df[parameter_column] < limite_inferior_amb)
-        df[f'Flag_{parameter_column}'] |= np.where(condition_fail_envir, 4, 0)
+        condition_fail_sensor = (df[parameter_column] > limite_superior_ambiental) | (df[parameter_column] < limite_inferior_ambiental)
+        df[f'Flag_{parameter_column}'] |= np.where(condition_fail_sensor, 4, 0)
         alerta(alert_window_size, parameter_column, range_check_enviroment.__name__, df)
     return df, inspect.currentframe().f_code.co_name
 
@@ -422,7 +436,6 @@ def teste_continuidade_tempo(df, limite_sigma_aceitavel_and_dict_delta_site,aler
         condition_fail = (df[parameter_column] < lower_limit_fail) | (df[parameter_column] > upper_limit_fail)
         df[f'Flag_{parameter_column}'] |= np.where(condition_fail, 4, 0)
         alerta(alert_window_size, parameter_column, teste_continuidade_tempo.__name__, df) 
-
     return df, inspect.currentframe().f_code.co_name
 
 #Teste 9: Identificar duplicatas.
@@ -475,26 +488,18 @@ def max_min_test(df, dict_max_min_test):
         delta = params["delta"]
         m_points = params["m_points"]
         window_size = params["window_size"]
-
         df[parameter_column] = pd.to_numeric(df[parameter_column], errors='coerce')
-        
-        # Verificar se há valores NaN após conversão e imprimir as posições
         invalid_positions = df[parameter_column].isna()
         if invalid_positions.any():
             print(f"Valores não numéricos encontrados na coluna '{parameter_column}' nos índices: {df[invalid_positions].index.tolist()}")
-        
         n_segments = window_size // m_points
         segments = [df.iloc[i * m_points: (i + 1) * m_points] for i in range(n_segments)]
         flag_col = f'Flag_{parameter_column}'
-        
         if flag_col not in df.columns:
             df[flag_col] = 0
-        
         for i, segment in enumerate(segments):
             segment_values = segment[parameter_column].values
-            
             if 'dir' in parameter_column.lower():
-                # Diferença angular
                 diffs = diferenca_angular(segment_values, np.roll(segment_values, -1))
                 diffs[-1] = 0  # Manter o último valor em 0
                 ampli_values = np.abs(diffs)
@@ -502,9 +507,7 @@ def max_min_test(df, dict_max_min_test):
             else:
                 ampli_value = abs(segment[parameter_column].max() - segment[parameter_column].min())
                 df.loc[segment.index, flag_col] |= np.where(ampli_value >= delta, 3, 0)
-        
         alerta(window_size, parameter_column, max_min_test.__name__, df)
-    
     return df, inspect.currentframe().f_code.co_name
 
 
@@ -528,7 +531,9 @@ def verificar_velocidade_vs_rajada(df,alert_window_size):
 
 #TESTE 15: Verificar altura max vs sig
 def verificar_altura_max_vs_sig(df,Hs,Hmax):
-    df[f'Flag_{Hmax}'] |= np.where((Hs > Hmax), 4, 0)
+    
+    
+    df[f'Flag_{Hmax}'] |= np.where((df[Hs] > df[Hmax]), 4, 0)
     func_name = inspect.currentframe().f_code.co_name
     return df, func_name   
 

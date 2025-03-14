@@ -5,29 +5,26 @@ from utide import solve, reconstruct
 import numpy as np
 from scipy.signal import butter, filtfilt
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-import scipy.stats as stats
-def carregar_dados(uploaded_file):
-    df = pd.read_csv(uploaded_file)
-    st.write("Prévia dos dados:")
-    st.dataframe(df.head())
-    return df
-def processar_dados(df, time_col, height_col):
-    df[time_col] = pd.to_datetime(df[time_col], errors='coerce')
-    df = df.dropna(subset=[time_col, height_col])
-    df = df.sort_values(by=time_col)
-    return df
-def carregar_e_processar_csv(df, time_col, height_col):
-    # df = pd.read_csv(file_path)
-    df[time_col] = pd.to_datetime(df[time_col], errors='coerce')
-    df = df.dropna(subset=[time_col, height_col])
-    df = df.sort_values(by=time_col)
-    return df
+# from OPERACIONAL_UMI_SIMPLIFICADO import *
+
 def calcular_metricas(verdadeiro, previsto):
     mae = mean_absolute_error(verdadeiro, previsto)
     rmse = np.sqrt(mean_squared_error(verdadeiro, previsto))
     r2 = r2_score(verdadeiro, previsto)
     mape = np.mean(np.abs((verdadeiro - previsto) / verdadeiro)) * 100
     return mae, rmse, r2, mape
+
+def processar_dados(df, time_col, height_col):
+    df[time_col] = pd.to_datetime(df[time_col], errors='coerce')
+    df = df.dropna(subset=[time_col, height_col])
+    df = df.sort_values(by=time_col)
+    return df
+def carregar_e_processar_csv(df, time_col, height_col):
+    df[time_col] = pd.to_datetime(df[time_col], errors='coerce')
+    df = df.dropna(subset=[time_col, height_col])
+    df = df.sort_values(by=time_col)
+    return df
+
 def calcular_intervalo(df, time_col):
     df['delta_t'] = df[time_col].diff().dt.total_seconds()
     avg_delta_t = df['delta_t'].mean()
@@ -69,7 +66,7 @@ def reindex_time_gaps(df,time_col, avg_delta_t):
     df.index.name = coluna_tempo  # Renomeia o índice para manter a consistência
     return df
 
-def extrair_componentes(df, time_col, filtered_col):
+def extrair_componentes(df, latitude, time_col, filtered_col):
     maior_bloco = encontrar_maior_bloco(df, filtered_col)
     maior_bloco[time_col] = pd.to_datetime(maior_bloco[time_col], errors='coerce')
 
@@ -200,171 +197,181 @@ def download_dados(df, forecast_df):
         mime="text/csv"
     )
 
+def streamlituploadautomatico(df_tide,time_col ,height_col, latitude,tipo_de_filtro,avg_delta_t):
 
-# time_col = 'Time, GMT-03:00'
-# height_col = 'Scaled Series - Avg, Metros, TOIL SENSOR 1'
-
-# # "Time, GMT-03:00","Scaled Series - Avg, Metros, TOIL SENSOR 1"
-# df=carregar_dados(r"C:\Users\campo\Downloads\PP_100_22_PDA_TOIL_NOVO_2025_01_22_14_52_41_ART_1.csv")
-
-# # df = processar_dados(df, time_col, height_col)
-# # df = carregar_e_processar_csv(df, time_col, height_col)
-
-# avg_delta_t = 300
-# filtered_data_weak = aplicar_filtro(df, height_col, 'Fraco', sampling_interval=600)
-# filtered_data_medium = aplicar_filtro(df, height_col, 'Médio', sampling_interval=600)
-# df['Filtro Fraco'] = filtered_data_weak
-# df['Filtro Médio'] = filtered_data_medium
-# maior_bloco = encontrar_maior_bloco(df, 'Filtro Fraco')
-
-
-# # Reindexar para preencher os gaps no tempo
-# df = reindex_time_gaps(df, time_col,avg_delta_t)
-# coef = extrair_componentes(maior_bloco, time_col=time_col, filtered_col='Filtro Fraco')
-# df = reconstruir_mare(df, time_col, coef)
-# df = calcular_residuos(df, height_col)
-# forecast_df = gerar_previsao(df, coef, avg_delta_t, time_col)
-# df["Altura Preenchida"] = df[height_col].combine_first(df["Altura Prevista"])
-# # Ajustar os offsets nos gaps
-# df_ajustado = ajustar_offset_gaps(df, time_col=time_col, 
-#                               height_col=height_col,
-#                               predicted_col='Altura Preenchida')
-                
-
-
-st.title("Processamento e Análise de Séries Temporais")
-
-st.write("""
-Carregue um arquivo CSV contendo dados temporais e escolha as colunas correspondentes ao 
-tempo e à altura para gerar análises detalhadas, incluindo gráficos, tabelas e opções de download.
-""")
-uploaded_file = st.file_uploader("Carregue o arquivo CSV", type="csv")
-
-if uploaded_file:
-    df = pd.read_csv(uploaded_file)
-
-    st.subheader("Selecione as colunas:")
-    time_col = st.selectbox("Selecione a coluna do tempo:", df.columns, key="time_col")
-    height_col = st.selectbox("Selecione a coluna da altura:", df.columns, key="height_col")
-
-    # Só executa as funções após selecionar as colunas
-    if time_col and height_col:
-        st.success(f"Colunas selecionadas: Tempo = '{time_col}', Altura = '{height_col}'")
-        # Seleção do filtro
-        tipo_filtro = st.selectbox(
-            "Selecione o tipo de filtro que deseja aplicar:",
-            options=[f'{height_col}', "Filtro Fraco", "Filtro Médio"],
-            index=0  # Default: "Sem Filtro"
-        )
-
-        filtro_selecionado = st.radio(
-            "Escolha o tipo de filtro a ser aplicado:",
-            (f'{height_col}', "Filtro Fraco", "Filtro Médio"),
-        )
-        latitude = st.number_input(r"Insira a latitude do local (exemplo: -21 para Vitória/ES)", 
-                           min_value=-90.0, max_value=90.0, value=-21.0, step=0.1)
-
-        # Habilitar botão somente após seleção do filtro
-        if filtro_selecionado:
-            if st.button("Processar Dados"):
-                with st.spinner("Processando os dados..."):
-                    # Processamento inicial
-
-  
+    st.title("Processamento e Análise de Séries Temporais")
     
-    # time_col = 'Time, GMT-03:00'
-    # height_col = 'Scaled Series - Avg, Metros, TESTE_CPES SENSOR 1'
-    # df=carregar_dados(r"C:\Users\campo\Downloads\CPES_OUT2024_2024_12_19_09_19_48_ART_1.csv")
+    df = df_tide
     
-    # df = processar_dados(df, time_col, height_col)
-                    df = carregar_e_processar_csv(df, time_col, height_col)
-                    tipo_de_filtro='Filtro Fraco'
-                    tipo_de_filtro=filtro_selecionado
-                    avg_delta_t = 300
-                    filtered_data_weak = aplicar_filtro(df, height_col, 'Fraco', sampling_interval=600)
-                    filtered_data_medium = aplicar_filtro(df, height_col, 'Médio', sampling_interval=600)
-                    df['Filtro Fraco'] = filtered_data_weak
-                    df['Filtro Médio'] = filtered_data_medium
-                    maior_bloco = encontrar_maior_bloco(df, tipo_de_filtro)
-                    
-                    
-                    # Reindexar para preencher os gaps no tempo
-                    df = reindex_time_gaps(df, time_col,avg_delta_t)
-                    coef = extrair_componentes(maior_bloco, time_col=time_col, filtered_col=tipo_de_filtro)
-                    df = reconstruir_mare(df, time_col, coef)
-                    df = calcular_residuos(df, height_col)
-                    forecast_df = gerar_previsao(df, coef, avg_delta_t, time_col)
-                    df["Altura Preenchida"] = df[height_col].combine_first(df["Altura Prevista"])
-                    # Ajustar os offsets nos gaps
-                    df_ajustado = ajustar_offset_gaps(df, time_col=time_col, 
-                                                      height_col=height_col,
-                                                      predicted_col='Altura Preenchida')
-                    
-                    grafico_original(df, time_col, height_col)
-                    grafico_comparativo(df_ajustado, time_col, height_col, filtered_data_weak, filtered_data_medium)
-                    exibir_componentes(coef, tipo_de_filtro)
-                    ###
-                    df_clean = df[[tipo_de_filtro, "Altura Prevista"]].dropna()
-                    mae_utide, rmse_utide, r2_utide, mape_utide = calcular_metricas(df_clean[tipo_de_filtro], df_clean["Altura Prevista"])
+    
+    df = carregar_e_processar_csv(df, time_col, height_col)
+    filtered_data_weak = aplicar_filtro(df, height_col, 'Fraco', sampling_interval=600)
+    filtered_data_medium = aplicar_filtro(df, height_col, 'Médio', sampling_interval=600)
+    df['Filtro Fraco'] = filtered_data_weak
+    df['Filtro Médio'] = filtered_data_medium
+    maior_bloco = encontrar_maior_bloco(df, tipo_de_filtro)
+    df = reindex_time_gaps(df, time_col,avg_delta_t)
+    coef = extrair_componentes(maior_bloco, latitude, time_col=time_col, filtered_col=tipo_de_filtro)
+    df = reconstruir_mare(df, time_col, coef)
+    df = calcular_residuos(df, height_col)
+    forecast_df = gerar_previsao(df, coef, avg_delta_t, time_col)
+    df["Altura Preenchida"] = df[height_col].combine_first(df["Altura Prevista"])
+    df_ajustado = ajustar_offset_gaps(df, time_col=time_col, 
+                                      height_col=height_col,
+                                      predicted_col='Altura Preenchida')
+    st.dataframe(df_ajustado)  # Mostra as primeiras 5 linhas
+    grafico_original(df, time_col, height_col)
+    grafico_comparativo(df_ajustado, time_col, height_col, filtered_data_weak, filtered_data_medium)
+    exibir_componentes(coef, tipo_de_filtro)
+    df_clean = df[[tipo_de_filtro, "Altura Prevista"]].dropna()
+    mae_utide, rmse_utide, r2_utide, mape_utide = calcular_metricas(df_clean[tipo_de_filtro], df_clean["Altura Prevista"])
 
-                    st.write("### Avaliação dos Modelos")
+    st.write("### Avaliação dos Modelos")
 
-                    st.write(f"**UTIDE:** MAE = {mae_utide:.4f}, RMSE = {rmse_utide:.4f}, R² = {r2_utide:.4f}, MAPE = {mape_utide:.2f}%")
+    st.write(f"**UTIDE:** MAE = {mae_utide:.4f}, RMSE = {rmse_utide:.4f}, R² = {r2_utide:.4f}, MAPE = {mape_utide:.2f}%")
 
-                    
-                    ###
-                    st.title("Tabela de Dados")
-                    st.dataframe(df_ajustado.head())  # Mostra as primeiras 5 linhas
-                    
-                    grafico_residuos(df_ajustado, time_col)
-                    
-                    grafico_previsao(forecast_df)
-                    
-                    download_dados(df_ajustado, forecast_df)
-                    tid_content = df_ajustado.to_csv(index=False, sep="\t")  # Converte para formato tabulado
-                    
-                    # Botão de download para o arquivo .tid
-                    st.download_button(
-                        label="Baixar Arquivo .tid",
-                        data=tid_content,
-                        file_name="dados_processados.tid",
-                        mime="text/plain"
-                    )
+    st.title("Tabela de Dados")
+    st.dataframe(df_ajustado.head())  # Mostra as primeiras 5 linhas
+    grafico_residuos(df_ajustado, time_col)
+    grafico_previsao(forecast_df)
+    download_dados(df_ajustado, forecast_df)
+    tid_content = df_ajustado.to_csv(index=False, sep="\t")  # Converte para formato tabulado
+    st.download_button(
+        label="Baixar Arquivo .tid",
+        data=tid_content,
+        file_name="dados_processados.tid",
+        mime="text/plain"
+    )
+def streamlituploadmanual():
 
-import streamlit as st
-from github import Github
+    st.title("Processamento e Análise de Séries Temporais")
+    
+    st.write("""
+    Carregue um arquivo CSV contendo dados temporais e escolha as colunas correspondentes ao 
+    tempo e à altura para gerar análises detalhadas, incluindo gráficos, tabelas e opções de download.
+    """)
+    uploaded_file = st.file_uploader("Carregue o arquivo CSV", type="csv")
+    
+    if uploaded_file:
+        df = pd.read_csv(uploaded_file)
+    
+        st.subheader("Selecione as colunas:")
+        time_col = st.selectbox("Selecione a coluna do tempo:", df.columns, key="time_col")
+        height_col = st.selectbox("Selecione a coluna da altura:", df.columns, key="height_col")
+    
+        # Só executa as funções após selecionar as colunas
+        if time_col and height_col:
+            st.success(f"Colunas selecionadas: Tempo = '{time_col}', Altura = '{height_col}'")
+            # Seleção do filtro
+            tipo_filtro = st.selectbox(
+                "Selecione o tipo de filtro que deseja aplicar:",
+                options=[f'{height_col}', "Filtro Fraco", "Filtro Médio"],
+                index=0  # Default: "Sem Filtro"
+            )
+    
+            filtro_selecionado = st.radio(
+                "Escolha o tipo de filtro a ser aplicado:",
+                (f'{height_col}', "Filtro Fraco", "Filtro Médio"),
+            )
+            latitude = st.number_input(r"Insira a latitude do local (exemplo: -21 para o Vitória/ES)", 
+                               min_value=-90.0, max_value=90.0, value=-21.0, step=0.1)
+    
+            # Habilitar botão somente após seleção do filtro
+            if filtro_selecionado:
+                if st.button("Processar Dados"):
+                    with st.spinner("Processando os dados..."):
+                        # Processamento inicial
+    
+      
+        
+        # time_col = 'Time, GMT-03:00'
+        # height_col = 'Scaled Series - Avg, Metros, TESTE_CPES SENSOR 1'
+        # df=carregar_dados(r"C:\Users\campo\Downloads\CPES_OUT2024_2024_12_19_09_19_48_ART_1.csv")
+        
+        # df = processar_dados(df, time_col, height_col)
+                        df = carregar_e_processar_csv(df, time_col, height_col)
+                        tipo_de_filtro='Filtro Fraco'
+                        tipo_de_filtro=filtro_selecionado
+                        avg_delta_t = 300
+                        filtered_data_weak = aplicar_filtro(df, height_col, 'Fraco', sampling_interval=600)
+                        filtered_data_medium = aplicar_filtro(df, height_col, 'Médio', sampling_interval=600)
+                        df['Filtro Fraco'] = filtered_data_weak
+                        df['Filtro Médio'] = filtered_data_medium
+                        maior_bloco = encontrar_maior_bloco(df, tipo_de_filtro)
+                        
+                        
+                        # Reindexar para preencher os gaps no tempo
+                        df = reindex_time_gaps(df, time_col,avg_delta_t)
+                        coef = extrair_componentes(maior_bloco, latitude,time_col=time_col, filtered_col=tipo_de_filtro)
+                        df = reconstruir_mare(df, time_col, coef)
+                        df = calcular_residuos(df, height_col)
+                        forecast_df = gerar_previsao(df, coef, avg_delta_t, time_col)
+                        df["Altura Preenchida"] = df[height_col].combine_first(df["Altura Prevista"])
+                        # Ajustar os offsets nos gaps
+                        df_ajustado = ajustar_offset_gaps(df, time_col=time_col, 
+                                                          height_col=height_col,
+                                                          predicted_col='Altura Preenchida')
+                        
+                        grafico_original(df, time_col, height_col)
+                        grafico_comparativo(df_ajustado, time_col, height_col, filtered_data_weak, filtered_data_medium)
+                        exibir_componentes(coef, tipo_de_filtro)
+                        st.title("Tabela de Dados")
+                        st.dataframe(df_ajustado.head())  # Mostra as primeiras 5 linhas
+                        
+                        grafico_residuos(df_ajustado, time_col)
+                        
+                        grafico_previsao(forecast_df)
+                        
+                        download_dados(df_ajustado, forecast_df)
+                        tid_content = df_ajustado.to_csv(index=False, sep="\t")  # Converte para formato tabulado
+                        
+                        # Botão de download para o arquivo .tid
+                        st.download_button(
+                            label="Baixar Arquivo .tid",
+                            data=tid_content,
+                            file_name="dados_processados.tid",
+                            mime="text/plain"
+                        )
+    
+    
+    
+    # # Configurações do GitHub
+    # GITHUB_TOKEN = st.secrets["github_token"]  # Armazene o token no Streamlit Secrets
+    # REPO_NAME = "luiz00souza/qcmeteocean"  # Substitua pelo nome do seu repositório
+    
+    # # Função para criar uma issue no GitHub
+    # def create_github_issue(title, body):
+    #     try:
+    #         g = Github(GITHUB_TOKEN)
+    #         repo = g.get_repo(REPO_NAME)
+    #         issue = repo.create_issue(title=title, body=body)
+    #         return issue
+    #     except Exception as e:
+    #         return f"Erro ao criar a issue: {e}"
+    
+    # # Interface do Streamlit
+    # st.title("Caixa de Sugestões")
+    # st.write("Envie suas sugestões para melhorar este projeto!")
+    
+    # # Entrada do usuário
+    # suggestion = st.text_area("Escreva sua sugestão aqui:")
+    # name = st.text_input("Seu nome (opcional):")
+    
+    # # Botão para enviar
+    # if st.button("Enviar Sugestão"):
+    #     if suggestion.strip():
+    #         issue_title = f"Sugestão de {name or 'Anônimo'}"
+    #         issue_body = suggestion
+    #         result = create_github_issue(issue_title, issue_body)
+    #         if isinstance(result, str):
+    #             st.error(result)
+    #         else:
+    #             st.success(f"Sugestão enviada com sucesso! [Veja no GitHub]({result.html_url})")
+    #     else:
+    #         st.warning("Por favor, insira uma sugestão antes de enviar.")
+            
+# streamlituploadautomatico(df_tide,time_col = 'GMT-03:00',height_col = 'Pressure_S1', latitude =-21,tipo_de_filtro='Filtro Fraco',avg_delta_t = 300)# UTILIZAR PARA ARQUIVO PREDEFINIDO COM CONFIGURACOES PREDEFINIDAS
 
-# Configurações do GitHub
-GITHUB_TOKEN = st.secrets["github_token"]  # Armazene o token no Streamlit Secrets
-REPO_NAME = "luiz00souza/qcmeteocean"  # Substitua pelo nome do seu repositório
+# streamlituploadmanual()# UTILIZAR PARA PREVISOES RAPIDAS, REALIZANDO O UPLOAD DE QUALQUER ARQUIVO CSV
 
-# Função para criar uma issue no GitHub
-def create_github_issue(title, body):
-    try:
-        g = Github(GITHUB_TOKEN)
-        repo = g.get_repo(REPO_NAME)
-        issue = repo.create_issue(title=title, body=body)
-        return issue
-    except Exception as e:
-        return f"Erro ao criar a issue: {e}"
-
-# Interface do Streamlit
-st.title("Caixa de Sugestões")
-st.write("Envie suas sugestões para melhorar este projeto!")
-
-# Entrada do usuário
-suggestion = st.text_area("Escreva sua sugestão aqui:")
-name = st.text_input("Seu nome (opcional):")
-
-# Botão para enviar
-if st.button("Enviar Sugestão"):
-    if suggestion.strip():
-        issue_title = f"Sugestão de {name or 'Anônimo'}"
-        issue_body = suggestion
-        result = create_github_issue(issue_title, issue_body)
-        if isinstance(result, str):
-            st.error(result)
-        else:
-            st.success(f"Sugestão enviada com sucesso! [Veja no GitHub]({result.html_url})")
-    else:
-        st.warning("Por favor, insira uma sugestão antes de enviar.")
+    
