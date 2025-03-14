@@ -5,6 +5,8 @@ import plotly.express as px
 from Acesso_Dados_servidor_FTP_01 import *
 from OPERACIONAL_UMI_SIMPLIFICADO import *
 from previsaomare import *
+from OPERACIONAL_UMI_SIMPLIFICADO import df_ondas_nao_direcionais
+
 import altair as alt
 import json
 @st.cache_data
