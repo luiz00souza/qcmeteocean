@@ -2,13 +2,9 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import plotly.express as px 
-import Acesso_Dados_servidor_FTP_01
-import OPERACIONAL_UMI_SIMPLIFICADO 
-import previsaomare 
-
-# Exibir todas as variáveis disponíveis no módulo
-st.write("Variáveis no módulo:", dir(OPERACIONAL_UMI_SIMPLIFICADO))
-
+from Acesso_Dados_servidor_FTP_01 import *
+from OPERACIONAL_UMI_SIMPLIFICADO import *
+from previsaomare import *
 import altair as alt
 import json
 @st.cache_data
