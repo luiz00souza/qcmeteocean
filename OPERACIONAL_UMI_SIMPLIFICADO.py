@@ -132,7 +132,7 @@ with open(r"dicionarios.json", 'r') as file:
 # Substitua pelo link do seu JSON no GitHub
 #url = "https://raw.githubusercontent.com/luiz00souza/qcmeteocean/refs/heads/luiz00souza-dashqaqc/dicionarios.json"
 
-3response = requests.get(url)
+#response = requests.get(url)
 
 #if response.status_code == 200:
 #    config_data = response.json()  # Carrega o JSON diretamente da resposta
