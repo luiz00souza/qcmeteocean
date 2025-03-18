@@ -370,7 +370,7 @@ def processar_dados(df, opcao):
         if opcao=="CORRENTES":
             matriz_calor_correntes(df_matriz_qc,opcao)
     with aba4:
-        json_path = r"C:\Users\campo\Desktop\dicionarios.json"
+        json_path = r"dicionarios.json"
         
         with open(json_path, 'r') as file:
             dados = json.load(file)
