@@ -127,7 +127,7 @@ func_names = [
 ]
 
 # Carregar o arquivo JSON
-with open("dicionarios.json", 'r') as file:
+with open(r"dicionarios.json", 'r') as file:
     config_data = json.load(file)
 
 #%%FILTRAR AS STRINGS DE CORRENTE SIG
