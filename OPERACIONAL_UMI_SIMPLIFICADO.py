@@ -12,9 +12,6 @@ input_file_meteo = r"21663137___Over_the_last_week_2024_07_26_07_56_08_ART_1.xls
 input_file_ADCP = r'DEMO_AWAC_UmiSan.txt'
 input_file_mare = r"PP_227_22_VALE_TUBARO_2024_04_28_16_06_59_ART_1.csv"
 input_file_ondas_nao_direcionais=r"wave_parameters.csv"
-
-#%% IDENTIFICAÇÃO DAS STRINGS
-#1_Strings do adcp sig1000
 parameter_columns_PNORC= ['GMT-03:00','Identifier','Data','Time','Cell number','v1', 'v2', 'v3','Speed(m/s)','Direction','Amplitude unit', 'Amplitude','A2','A3','A4','Correlation','Checksum']
 parameter_columns_PNORW= ['GMT-03:00','Identifier','date','time','Spectrum basis type','Processing method','Hm0','H3','H10','Hmax','Tm02','Tp','Tz','DirTp','SprTp','Main Direction','Unidirectivity index','Mean pressure','Number of no detects','Number of bad detects','Near surface current speed','Near surface current Direction','error code']
 parameter_columns_PNORB= ['GMT-03:00', 'Identifier','Date','Time','Spectrum basis type','Processing method','Frequency low','Frequency high','Hm0','Tm02','Tp','DirTp', 'SprTp','Main Direction','Error code']
@@ -130,7 +127,7 @@ func_names = [
 ]
 
 # Carregar o arquivo JSON
-with open(r"dicionarios.json", 'r') as file:
+with open(r"C:\Users\campo\Desktop\dicionarios.json", 'r') as file:
     config_data = json.load(file)
 
 #%%FILTRAR AS STRINGS DE CORRENTE SIG
@@ -288,16 +285,19 @@ for parametro_para_teste in lista_sensores:
         
     df['GMT-03:00'] = pd.to_datetime(df['GMT-03:00'], errors='coerce')
     
-    plot_historical_series(df, parameter_columns) 
+    # plot_historical_series(df, parameter_columns) 
     # if parametro_para_teste=='CORRENTES': 
     #     gerar_grafico_gradiente_vertical(df, linha_escolhida=0, coluna_escolhida='speed(m/s)')
     #     gerar_grafico_gradiente_vertical(df, linha_escolhida=0, coluna_escolhida='amplitude')
-    # resultados["parameter_column"] = parametro_para_teste  
+    resultados["parameter_column"] = parametro_para_teste  
 
     todos_os_resultados.append(resultados)
 todos_os_resultados = pd.concat(todos_os_resultados, ignore_index=True)
 # todos_os_resultados.to_csv(r"C:\Users\campo\Desktop\matriz.csv", index=False,sep=",")
 #%%
+
+
+
 
 
 
