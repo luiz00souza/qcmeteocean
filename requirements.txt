@@ -9,3 +9,4 @@ setuptools
 utide
 PyGithub
 openpyxl
+requests
