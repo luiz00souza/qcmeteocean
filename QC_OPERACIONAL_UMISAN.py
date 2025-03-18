@@ -1,4 +1,5 @@
 #%%IMPORTAÇÃO DAS BIBLIOTECAS
+import requests
 
 import sys
 # sys.path.append(r'G:\Drives compartilhados\DHE_REPASSE\2024\ID00_PD_MITR-QCMO\01_Scripts\20241206_Version_008')  # Caminho onde o arquivo .py está
