@@ -1,7 +1,7 @@
 import sys
 from QC_FLAGS_UMISAN import *
 import json
-
+import requests
 numero_de_celulas= 20
 alert_window_size= 100 #Tamanho da janela de dados para ativar o sistema de alerta
 sampling_frequency = 30 # em minutos 
