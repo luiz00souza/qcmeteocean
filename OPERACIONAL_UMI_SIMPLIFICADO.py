@@ -127,17 +127,17 @@ func_names = [
 ]
 
 # Carregar o arquivo JSON
-# with open(r"dicionarios.json", 'r') as file:
- #   config_data = json.load(file)
+with open(r"dicionarios.json", 'r') as file:
+    config_data = json.load(file)
 # Substitua pelo link do seu JSON no GitHub
-url = "https://raw.githubusercontent.com/luiz00souza/qcmeteocean/refs/heads/luiz00souza-dashqaqc/dicionarios.json"
+#url = "https://raw.githubusercontent.com/luiz00souza/qcmeteocean/refs/heads/luiz00souza-dashqaqc/dicionarios.json"
 
-response = requests.get(url)
+3response = requests.get(url)
 
-if response.status_code == 200:
-    config_data = response.json()  # Carrega o JSON diretamente da resposta
-else:
-    print(f"Erro ao baixar o JSON: {response.status_code}")
+#if response.status_code == 200:
+#    config_data = response.json()  # Carrega o JSON diretamente da resposta
+#else:
+#    print(f"Erro ao baixar o JSON: {response.status_code}")
 #%%FILTRAR AS STRINGS DE CORRENTE SIG
 prefix_dfs = process_txt_to_multiple_dfs(input_file_ADCP)
 df_PNORI = prefix_dfs['$PNORI']
