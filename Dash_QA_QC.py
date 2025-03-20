@@ -337,7 +337,7 @@ def processar_dados(df, opcao):
     st.sidebar.subheader("Colunas para Visualização")
     colunas_disponiveis = [col for col in df.columns if col not in ["TIMESTAMP", "RECORD"]]
     colunas_selecionadas = st.sidebar.multiselect("Selecione as colunas", colunas_disponiveis, default=colunas_disponiveis)
-    aba1, aba2, aba3, aba4, aba5 = st.tabs(["📄 Dados Brutos", "Dados Processados","QA/QC","Dicionários","Sobre"])
+    aba1, aba2, aba3, aba4, aba5,aba6 = st.tabs(["📄 Dados Brutos", "Dados Processados","QA/QC","Dicionários","Sobre","Relatorios"])
     with aba1:
         if colunas_selecionadas:
             colunas_selecionadas = [col for col in colunas_selecionadas if col != 'GMT-03:00' and not col.startswith('Flag')]
@@ -417,6 +417,18 @@ def processar_dados(df, opcao):
             st.write(f"**Parâmetros analisáveis:** {', '.join(parametros)}")
             st.markdown(f"**Normativas associadas:** {normativa}")
             st.markdown("---")  # Linha separadora
+    with aba6:
+        st.title("🔍 Relátorios")
+        st.markdown(
+            """
+            <a href="https://relatoriomensal-qxuk3nrg53x8iqmtutp3lg.streamlit.app/" target="_blank">
+                <button style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
+                    Gerar Relatórios
+                </button>
+            </a>
+            """,
+            unsafe_allow_html=True
+        )
 df_matriz_qc = carregar_dados(todos_os_resultados)
 parametros_unicos = df_matriz_qc['parameter_column'].unique()
 def main():
