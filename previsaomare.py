@@ -143,6 +143,11 @@ def grafico_original(df, time_col, height_col):
 )
     st.plotly_chart(fig)
 def grafico_comparativo(df, time_col, height_col, filtered_data_weak, filtered_data_medium):
+    df_plot = df.rename(columns={
+    height_col: "Dados medidos",
+    'Filtro Fraco': "Filtro Fraco",
+    'Filtro Médio': "Filtro Médio"
+    })
     # Gráfico com filtros
     fig_filtered = px.line(
         df, 
