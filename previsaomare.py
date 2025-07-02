@@ -70,7 +70,7 @@ def reindex_time_gaps(df,time_col, avg_delta_t):
     return df
 
 def extrair_componentes(df, time_col, filtered_col):
-    maior_bloco = encontrar_maior_bloco(df, filtered_col)
+    maior_bloco = encontrar_maior_bloco(df['Filtro Médio'], filtered_col)
     maior_bloco[time_col] = pd.to_datetime(maior_bloco[time_col], errors='coerce')
 
     time_dt = maior_bloco[time_col].dt.to_pydatetime()
