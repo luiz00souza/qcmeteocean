@@ -70,7 +70,7 @@ def reindex_time_gaps(df,time_col, avg_delta_t):
     return df
 
 def extrair_componentes(df, time_col, filtered_col):
-    maior_bloco = encontrar_maior_bloco(df['Filtro Médio'], filtered_col)
+    maior_bloco = encontrar_maior_bloco(df, filtered_col)
     maior_bloco[time_col] = pd.to_datetime(maior_bloco[time_col], errors='coerce')
 
     time_dt = maior_bloco[time_col].dt.to_pydatetime()
@@ -278,7 +278,7 @@ if uploaded_file:
     
     # df = processar_dados(df, time_col, height_col)
                     df = carregar_e_processar_csv(df, time_col, height_col)
-                    tipo_de_filtro='Filtro Fraco'
+                    tipo_de_filtro='Filtro Médio'
                     tipo_de_filtro=filtro_selecionado
                     avg_delta_t = 300
                     filtered_data_weak = aplicar_filtro(df, height_col, 'Fraco', sampling_interval=600)
