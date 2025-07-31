@@ -94,7 +94,7 @@ def plotar_mare(tempos, mare):
     return fig
 
 # Interface Streamlit
-st.title("Previsão de Maré para 1 Ano")
+st.title("Plataforma Interativa para Análise de Componentes de Maré")
 
 local = st.selectbox("Selecione uma localidade", list(presets_locais.keys()))
 
